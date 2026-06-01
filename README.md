@@ -26,8 +26,8 @@ This web tool is a lightweight, single-file interactive application designed to 
 Built entirely in a single HTML file, it requires no installation, no database, and works on any modern device.
 
 <p align="center">
-  <a href="[https://amzn.to/2lSxGb](https://www.amazon.com/Predators-Soul-Victory-Joel-Childers-ebook/dp/B07VTV8T4X/ref=sr_1_2?crid=3UUOY1NDPGA0H&dib=eyJ2IjoiMSJ9.vf1BPyfaCYrd0GOBFXeguhVC9bmqNwiQe_un7KG8BIY7v8_rBkZ0MwvFPpIFFL6VkvuvpeBNNUyAODT_0U5VEbD2B77cCkR-rr0TOiyHFVyDs7fiSOH8CCyR4gjO-fb7gyIfekYv8IDXLJnR3hJT8w.GP5xXV8GVpJaerSoA30AWyYyvn6iCECCk69MwguE8z8&dib_tag=se&keywords=joel+childers&qid=1780334492&sprefix=%2Caps%2C120&sr=8-2)">
-    <img src="[[https://img.shields.io/badge/Buy%20on%20Amazon-FF9900?style=for-the-badge&logo=amazon&logoColor=white" alt="Amazon Link](https://www.amazon.com/Predators-Soul-Victory-Joel-Childers-ebook/dp/B07VTV8T4X/ref=sr_1_2?sr=8-2)](https://m.media-amazon.com/images/I/51+Aea8zLnL._SY466_.jpg)">
+  <a href="https://amzn.to/2lSxGb](https://www.amazon.com/Predators-Soul-Victory-Joel-Childers-ebook/dp/B07VTV8T4X/ref=sr_1_2?crid=3UUOY1NDPGA0H&dib=eyJ2IjoiMSJ9.vf1BPyfaCYrd0GOBFXeguhVC9bmqNwiQe_un7KG8BIY7v8_rBkZ0MwvFPpIFFL6VkvuvpeBNNUyAODT_0U5VEbD2B77cCkR-rr0TOiyHFVyDs7fiSOH8CCyR4gjO-fb7gyIfekYv8IDXLJnR3hJT8w.GP5xXV8GVpJaerSoA30AWyYyvn6iCECCk69MwguE8z8&dib_tag=se&keywords=joel+childers&qid=1780334492&sprefix=%2Caps%2C120&sr=8-2)">
+    <img src="https://img.shields.io/badge/Buy%20on%20Amazon-FF9900?style=for-the-badge&logo=amazon&logoColor=white" alt="Amazon Link](https://www.amazon.com/Predators-Soul-Victory-Joel-Childers-ebook/dp/B07VTV8T4X/ref=sr_1_2?sr=8-2)](https://m.media-amazon.com/images/I/51+Aea8zLnL._SY466_.jpg)">
   </a>
 </p>
 
