@@ -27,7 +27,7 @@ Built entirely in a single HTML file, it requires no installation, no database, 
 
 <p align="center">
   <a href="https://amzn.to/2lSxGb">
-    <img src="https://img.shields.io/badge/Buy%20on%20Amazon-FF9900?style=for-the-badge&logo=amazon&logoColor=white" alt="Amazon Link">
+    <img src="[https://img.shields.io/badge/Buy%20on%20Amazon-FF9900?style=for-the-badge&logo=amazon&logoColor=white" alt="Amazon Link](https://www.amazon.com/Predators-Soul-Victory-Joel-Childers-ebook/dp/B07VTV8T4X/ref=sr_1_2?sr=8-2)">
   </a>
 </p>
 
