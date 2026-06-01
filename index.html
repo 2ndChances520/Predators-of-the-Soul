@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Predators of the Soul: Study Game</title>
+    <style>
+        :root {
+            --bg-deep: #0a0f0d;
+            --bg-panel: #161d1a;
+            --bg-sidebar: #050807;
+            --accent-primary: #22c55e; /* Jungle Green */
+            --accent-secondary: #eab308; /* Savannah Gold */
+            --text-main: #f0fdf4;
+            --text-muted: #94a3b8;
+            --success: #22c55e;
+            --danger: #ef4444;
+            --font-main: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: var(--font-main);
+            background-color: var(--bg-deep);
+            color: var(--text-main);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        header {
+            background: rgba(10, 15, 13, 0.9);
+            backdrop-filter: blur(10px);
+            padding: 1rem 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid rgba(34, 197, 94, 0.2);
+            z-index: 10;
+        }
+
+        .header-left { display: flex; align-items: center; gap: 1rem; }
+        .logo-circle {
+            width: 40px; height: 40px; border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            display: flex; align-items: center; justify-content: center; font-weight: bold; color: black;
+        }
+
+        .badge-pill {
+            background: rgba(255,255,255,0.05);
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            display: flex; align-items: center; gap: 0.5rem;
+        }
+
+        .app-container { display: flex; flex: 1; overflow: hidden; }
+
+        /* Sidebar */
+        .sidebar {
+            width: 300px;
+            background: var(--bg-sidebar);
+            border-right: 1px solid rgba(34, 197, 94, 0.1);
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+
+        .sidebar-header { padding: 1.5rem; font-size: 1.1rem; font-weight: 600; color: var(--accent-primary); letter-spacing: 1px; }
+        .chapter-list { list-style: none; padding: 0 1rem 1rem 1rem; }
+        .chapter-card {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 8px;
+            padding: 0.8rem;
+            margin-bottom: 0.6rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .chapter-card:hover:not(.locked) { border-color: var(--accent-primary); background: rgba(34, 197, 94, 0.1); }
+        .chapter-card.active { border-color: var(--accent-secondary); background: rgba(234, 179, 8, 0.1); }
+        .chapter-card.locked { opacity: 0.3; cursor: not-allowed; position: relative; }
+        .chapter-card.locked::after { content: "🔒"; position: absolute; right: 15px; top: 15px; font-size: 0.8rem; }
+        .chapter-num { font-size: 0.75rem; color: var(--text-muted); }
+        .chapter-title { font-weight: 600; font-size: 0.9rem; margin-top: 2px; }
+
+        /* Stage */
+        .stage { flex: 1; display: flex; flex-direction: column; background: var(--bg-panel); overflow: hidden; }
+        .tabs { display: flex; border-bottom: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.2); }
+        .tab {
+            padding: 1rem 1.5rem; cursor: pointer; color: var(--text-muted); font-size: 0.85rem;
+            font-weight: 600; border-bottom: 2px solid transparent; transition: all 0.2s; text-transform: uppercase;
+        }
+        .tab.active { color: var(--accent-primary); border-bottom-color: var(--accent-primary); background: rgba(255,255,255,0.02); }
+
+        .tab-content { flex: 1; padding: 2.5rem; overflow-y: auto; display: none; }
+        .tab-content.active { display: block; animation: fadeIn 0.4s ease; }
+
+        /* Story Styles */
+        .story-header { color: var(--accent-secondary); margin-bottom: 1.5rem; font-size: 1.8rem; }
+        .quote-box {
+            border-left: 4px solid var(--accent-primary);
+            padding: 1.5rem; font-style: italic; margin: 2rem 0;
+            background: rgba(34, 197, 94, 0.05); border-radius: 0 12px 12px 0;
+            line-height: 1.6; color: #cbd5e1;
+        }
+        .chapter-icon { font-size: 2.5rem; margin-bottom: 1rem; display: block; }
+
+        /* Game Elements */
+        .quiz-grid, .verse-options { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1.5rem; }
+        .quiz-btn, .verse-option-btn {
+            background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1);
+            padding: 1.2rem; border-radius: 8px; color: var(--text-main); cursor: pointer; text-align: left;
+            font-size: 0.95rem; transition: all 0.2s;
+        }
+        .quiz-btn:hover:not(:disabled) { border-color: var(--accent-primary); background: rgba(34, 197, 94, 0.05); }
+        .correct { background: rgba(34, 197, 94, 0.2) !important; border-color: var(--success) !important; color: var(--success); }
+        .wrong { background: rgba(239, 68, 68, 0.2) !important; border-color: var(--danger) !important; color: var(--danger); }
+
+        .verse-blank { border-bottom: 2px solid var(--accent-secondary); min-width: 90px; display: inline-block; text-align: center; color: var(--accent-secondary); font-weight: bold; padding: 0 5px; }
+        
+        .order-item {
+            background: rgba(255,255,255,0.04); padding: 1.2rem; margin-bottom: 0.6rem;
+            border-radius: 8px; cursor: pointer; border: 1px solid rgba(255,255,255,0.1);
+            display: flex; align-items: center; gap: 1rem; transition: transform 0.2s;
+        }
+        .order-item:hover { transform: translateX(5px); border-color: var(--accent-secondary); }
+        .order-item.selected { border-color: var(--accent-primary); background: rgba(34, 197, 94, 0.1); }
+
+        .progress-bar { height: 10px; background: rgba(255,255,255,0.1); border-radius: 5px; margin-top: 10px; overflow: hidden; }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary)); width: 0%; transition: width 0.6s cubic-bezier(0.34, 1.56, 0.64, 1); }
+
+        .toast {
+            position: fixed; bottom: 30px; right: 30px; background: var(--accent-primary);
+            color: black; padding: 1rem 2rem; border-radius: 8px; z-index: 1000; font-weight: bold;
+            transform: translateY(120px); transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.5);
+        }
+        .toast.show { transform: translateY(0); }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+        
+        @media (max-width: 850px) {
+            .app-container { flex-direction: column; }
+            .sidebar { width: 100%; height: 200px; }
+            .quiz-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="header-left">
+            <div class="logo-circle">PS</div>
+            <h1>Predators of the Soul</h1>
+        </div>
+        <div class="header-right">
+            <div class="badge-pill">
+                <span style="color: var(--accent-secondary);">🐾</span>
+                <span class="token-count">0</span> Tokens
+            </div>
+            <div class="badge-pill progress-badge">
+                <span>Expedition: 1/9</span>
+            </div>
+            <button onclick="resetGame()" style="background:none; border: 1px solid var(--danger); color:var(--danger); padding:4px 10px; border-radius:4px; cursor:pointer; font-size:0.7rem; font-weight:bold; text-transform:uppercase; margin-left:10px;">Reset Data</button>
+        </div>
+    </header>
+
+    <div class="app-container">
+        <aside class="sidebar">
+            <div class="sidebar-header">THE SAFARI MAP</div>
+            <ul class="chapter-list" id="chapterList"></ul>
+        </aside>
+
+        <main class="stage">
+            <nav class="tabs">
+                <div class="tab active" data-tab="story" onclick="switchTab('story')">The Encounter</div>
+                <div class="tab" data-tab="quiz" onclick="switchTab('quiz')">Combat Check</div>
+                <div class="tab" data-tab="verse" onclick="switchTab('verse')">Sword Drill</div>
+                <div class="tab" data-tab="order" onclick="switchTab('order')">Strategy</div>
+            </nav>
+
+            <div id="story" class="tab-content active"></div>
+            <div id="quiz" class="tab-content"></div>
+            <div id="verse" class="tab-content"></div>
+            <div id="order" class="tab-content"></div>
+        </main>
+    </div>
+
+    <div id="toast" class="toast">Target Neutralized!</div>
+
+    <script>
+        const gameData = [
+            {
+                num: 1, 
+                icon: "🦁",
+                title: "The Valley of the Lions", 
+                predator: "FEAR",
+                summary: "The lion of the domain of darkness is Fear. It roars to cause a stampede of our emotions. Just as Patterson's lions stalked the Tsavo workers, fear stalks the periphery of our lives to consume our faith.",
+                quote: "What is a lion to a mountain? Your trust in God makes you secure in a time of insecurity.",
+                questions: [
+                    {q:"In the author's illustration, what was the name of the 'meanest lion' he encountered?", a:["Failure","Oblivion","Death","Sickness"], c:1},
+                    {q:"According to the book, what is the 'basis for all the fears that hunt humanity'?", a:["The Law","Knowledge of Good and Evil","The Wilderness","The Pharaoh"], c:1},
+                    {q:"What was the first response of Nehemiah and Moses when facing fear?", a:["Analysis","Flight","Prayer","Hiding"], c:2}
+                ],
+                fill: {text: "Be of ____ spirit, be on the ____. Your adversary, the devil, prowls around like a roaring ____.", words: ["sober", "alert", "lion"], options: ["sober", "alert", "brave", "lion", "tiger"]},
+                order: ["Stand your ground", "Shoot first (Prayer)", "Use the Word of God", "Lean upon Christ", "Fill your mind with wonder"]
+            },
+            {
+                num: 2, 
+                icon: "🐆",
+                title: "Leopard in the Shadows", 
+                predator: "ANGER & WRATH",
+                summary: "The leopard is a hidden danger, relying on stealth and stress. It is most effective in chaos. Human anger arises out of injury, spoiled plans, or immaturity, and it is a cunning killer.",
+                quote: "Controlling your anger won't cause you to walk in the Spirit, but walking in the Spirit will control your anger.",
+                questions: [
+                    {q:"The leopard is most effective when what is applied?", a:["Speed","Strength","Stress","Hunger"], c:2},
+                    {q:"According to James, the anger of man does not achieve what?", a:["Success","The Righteousness of God","Peace","Respect"], c:1},
+                    {q:"What is the 'silent revenge of the soul' described in this chapter?", a:["Bitterness","Holding on to anger","Silent treatment","Justice"], c:1}
+                ],
+                fill: {text: "Walk by the ____ and you will not carry out the ____ of the ____.", words: ["Spirit", "desires", "flesh"], options: ["Spirit", "desires", "works", "mind", "flesh"]},
+                order: ["Stress mounts in life", "The Leopard sees an opening", "The person stews on the problem", "Social boundaries melt away", "Explosion of anger"]
+            },
+            {
+                num: 3, 
+                icon: "🐕",
+                title: "Running with the Pack", 
+                predator: "LIES, MYTHS & SPECULATION",
+                summary: "The Cape hunting dog runs its prey to exhaustion. The devil uses lies, cultural myths, and self-centered speculation to wear down the saints until they trip and fall.",
+                quote: "Chaos is the predator's ally. Lies will drive; truth leads.",
+                questions: [
+                    {q:"What is the secret to defeating the 'dogs' of the soul?", a:["Running faster","Fighting alone","Standing firm","Ignoring them"], c:2},
+                    {q:"Which 'dog' is described as the most ferocious?", a:["Lies","Myths","Speculation","Gossip"], c:2},
+                    {q:"What does the author call our 'Utility Belt' of weapons?", a:["Faith","The Church","The Word of God","Prayer"], c:2}
+                ],
+                fill: {text: "The 'horns' are the ____ of God's Word, and the 'hoofs' are the ____ of God's Word.", words: ["authority", "power"], options: ["authority", "logic", "power", "grace"]},
+                order: ["The enemy plants a lie", "We run with the thought", "Exhaustion sets in", "The predator trips the prey", "The soul is devoured"]
+            },
+            {
+                num: 4, 
+                icon: "🐃",
+                title: "Staying with the Herd", 
+                predator: "ISOLATION",
+                summary: "Every predator's strategy is to separate the prey from the strength of the group. The 'Maverick' spirit of rugged individualism is a dangerous opening for soul predators.",
+                quote: "A pilot who abandons his wingman in a dogfight is not brave—he’s stupid.",
+                questions: [
+                    {q:"What animal group is used to illustrate the strong protecting the weak?", a:["Lions","Cape Buffalo/Yaks","Wild Dogs","Cheetahs"], c:1},
+                    {q:"What environment does 'Moralism' create that makes people hide their struggles?", a:["Hope-based","Grace-based","Shame-based","Faith-based"], c:2},
+                    {q:"Who does the author say always had a 'wingman' like Silas or Luke?", a:["David","Elijah","Paul","Peter"], c:2}
+                ],
+                fill: {text: "Two are ____ than one... for a ____ braided cord is not easily broken.", words: ["better", "triple"], options: ["better", "stronger", "double", "triple"]},
+                order: ["Isolation begins", "Self-deception takes root", "Horns and hoofs are weakened", "The predator attacks alone", "Defeat in the gulley"]
+            },
+            {
+                num: 5, 
+                icon: "🐅",
+                title: "The Crouching Tiger", 
+                predator: "SEXUAL IMMORALITY",
+                summary: "The tiger is attractive but fierce. Sexual immorality stalks everyone regardless of age or religion. The defense is not willpower, but the fire of the Spirit and high walls of covenant.",
+                quote: "Christian minds and marriages can’t take a cavalier attitude toward lust. They can’t make 'pets' out of this predator.",
+                questions: [
+                    {q:"What is the 'spear' in this chapter's parable?", a:["The Word","Prayer","Covenant","Fasting"], c:1},
+                    {q:"According to the book, what defines true sex?", a:["Emotion","Hormones","Marriage Covenant","Mutual Consent"], c:2},
+                    {q:"What movie character's use of fire is used as an illustration?", a:["Simba","Tarzan","Mowgli","Robin Hood"], c:2}
+                ],
+                fill: {text: "His ____ takes away our sin... redemption deals with the ____ of sin and the ____ of it as well.", words: ["blood", "act", "guilt"], options: ["blood", "love", "act", "shame", "guilt"]},
+                order: ["Power of the Cross", "Spirit within (Fire)", "High walls of Covenant", "Standard of the Word", "The Spear of Prayer"]
+            },
+            {
+                num: 6, 
+                icon: "🐊",
+                title: "Jaws of the Crocodile", 
+                predator: "DESPAIR & DEPRESSION",
+                summary: "Crocodiles blend into the daily routine. Despair is the loss of hope; depression is a persistent sadness. They drag the soul into the murky 'death roll' of hopelessness.",
+                quote: "The Spirit is incapable of producing hopelessness in our new hearts. He makes us 'crocodile proof.'",
+                questions: [
+                    {q:"What does the name 'Mara' mean in the context of time?", a:["A season","A year","A moment","A cycle"], c:0},
+                    {q:"What is the 'three-letter secret' to overcoming despair?", a:["Try","Let","Win","Now"], c:1},
+                    {q:"The author says hope is like what object for the soul?", a:["A shield","A lighthouse","An anchor","A sword"], c:2}
+                ],
+                fill: {text: "God has given you a new ____, a new ____, and His ____ so your heart can be influenced by hope.", words: ["heart", "spirit", "Spirit"], options: ["heart", "mind", "spirit", "life", "Spirit"]},
+                order: ["Realize difficult times happen", "Don't let the heart be troubled", "Abandon yourself to the Comforter", "Fill with the faith of Christ", "Hold on to the anchor of Hope"]
+            },
+            {
+                num: 7, 
+                icon: "🐕",
+                title: "Greed of the Hyena", 
+                predator: "THE LOVE OF MONEY",
+                summary: "Hyenas are harbingers of evil. Greed is a speed-eater that takes small compromises until the soul is consumed. It equates wealth with worth and leads to many griefs.",
+                quote: "If the purse is open to give, it is open to receive from God. If closed, it is closed to God.",
+                questions: [
+                    {q:"What is the 'root of all kinds of evil'?", a:["Money","The Love of Money","Poverty","The Hyena"], c:1},
+                    {q:"What was the casualty of the love of money in the case of Scrooge?", a:["Wealth","Happiness","Compassion","Success"], c:2},
+                    {q:"Which Bible character is the 'saddest scene' of walking away from faith?", a:["Judas","Rich Young Ruler","Ananias","Lot"], c:1}
+                ],
+                fill: {text: "Seeking first the ____ is the fixing of life according to the way ____ works.", words: ["kingdom", "God"], options: ["profit", "kingdom", "money", "God"]},
+                order: ["Small compromises made", "Desire for more seizes soul", "Equating wealth with worth", "Pierced with many griefs", "Wandering from the faith"]
+            },
+            {
+                num: 8, 
+                icon: "🐆",
+                title: "Tripped by the Cheetah", 
+                predator: "PRIDE",
+                summary: "Pride is a sleek, sexy cheetah. It trips us up with super-speed. We often match its pace trying to reinvent ourselves for the world's glory, leading to a fatal stumble.",
+                quote: "The victory over pride is not humility... it is Grace.",
+                questions: [
+                    {q:"What does the word 'glory' mean in Hebrew?", a:["Brightness","Weight or Value","Cloud","Victory"], c:1},
+                    {q:"What is the 'secret weapon' against pride?", a:["Self-Abuse","Fasting","Grace","Low opinion of self"], c:2},
+                    {q:"The author uses which famous athlete to illustrate partnering with Christ?", a:["Michael Jordan","Tiger Woods","Tom Brady","Muhammad Ali"], c:1}
+                ],
+                fill: {text: "Everything is ____... Get out of the ____... Stop ____ the worth of others.", words: ["grace", "race", "judging"], options: ["grace", "race", "effort", "judging", "hating"]},
+                order: ["Draw worth from Christ", "Everything is Grace", "Get out of the race", "Stop judging others", "Stop comparing"]
+            },
+            {
+                num: 9, 
+                icon: "🌳",
+                title: "Victory: The Seated Yoke", 
+                predator: "THE FINISHED WORK",
+                summary: "The Christian life is not about labor, but an invitation to rest. Christ reversed the effect of the Fall. We are his 'Poem', his workmanship, meant to walk in harmony with Him.",
+                quote: "Faith is the fruit of our relationship to Christ. It is a walk, not a work.",
+                questions: [
+                    {q:"What does the Greek word 'Karpos' mean?", a:["Labor","Outward evidence of inward power","Victory","Strength"], c:1},
+                    {q:"The author describes the yoke of Christ as what kind of yoke?", a:["A heavy yoke","A laboring yoke","A seated yoke","A wooden yoke"], c:2},
+                    {q:"What is the 'last exhortation' in the Bible mentioned at the end?", a:["Go","Fight","Come","Wait"], c:2}
+                ],
+                fill: {text: "You are God's ____... his work of art... created for ____ works.", words: ["poem", "good"], options: ["servant", "poem", "good", "great"]},
+                order: ["The Tree of Knowledge (Death)", "The Cross (Victory)", "Resurrection (Release)", "Ascension (Permanent Liberty)", "The Seated Yoke (Rest)"]
+            }
+        ];
+
+        let state = {
+            tokens: 0,
+            currentChapter: 1,
+            unlockedUntil: 1,
+            chapterTokens: {},
+            verseProgress: []
+        };
+
+        // Initialize
+        function init() {
+            const saved = localStorage.getItem('predatorsGame');
+            if (saved) state = JSON.parse(saved);
+            renderSidebar();
+            loadChapter(state.currentChapter);
+            updateHeader();
+        }
+
+        function save() {
+            localStorage.setItem('predatorsGame', JSON.stringify(state));
+        }
+
+        function loadChapter(num) {
+            state.currentChapter = num;
+            const data = gameData[num - 1];
+            
+            document.querySelectorAll('.chapter-card').forEach(c => c.classList.remove('active'));
+            const activeCard = document.querySelector(`[data-num="${num}"]`);
+            if(activeCard) activeCard.classList.add('active');
+
+            renderStory(data);
+            renderQuiz(data);
+            renderVerse(data);
+            renderOrder(data);
+            switchTab('story');
+            save();
+        }
+
+        function renderSidebar() {
+            const list = document.getElementById('chapterList');
+            list.innerHTML = gameData.map(ch => `
+                <li class="chapter-card ${ch.num > state.unlockedUntil ? 'locked' : ''} ${ch.num === state.currentChapter ? 'active' : ''}" 
+                    data-num="${ch.num}" 
+                    onclick="if(${ch.num <= state.unlockedUntil}) loadChapter(${ch.num})">
+                    <div class="chapter-num">CHAPTER ${ch.num}</div>
+                    <div class="chapter-title">${ch.title}</div>
+                </li>
+            `).join('');
+        }
+
+        function updateHeader() {
+            document.querySelector('.token-count').innerText = state.tokens;
+            document.querySelector('.progress-badge span').innerText = `Expedition: ${state.currentChapter}/9`;
+        }
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            document.querySelector(`[data-tab="${tabId}"]`).classList.add('active');
+            document.getElementById(tabId).classList.add('active');
+        }
+
+        // --- STORY ---
+        function renderStory(data) {
+            const earned = state.chapterTokens[data.num] || 0;
+            const progress = (earned / 30) * 100;
+            document.getElementById('story').innerHTML = `
+                <span class="chapter-icon">${data.icon}</span>
+                <h2 class="story-header">${data.num}. ${data.title}</h2>
+                <h3 style="color:var(--accent-primary); margin-bottom:1rem; font-size:1rem; letter-spacing:1px;">THE PREDATOR: ${data.predator}</h3>
+                <p style="line-height:1.7; font-size:1.1rem; color:var(--text-muted);">${data.summary}</p>
+                <div class="quote-box">
+                    "${data.quote}"
+                    <span style="display:block; margin-top:10px; color:var(--accent-primary); font-weight:bold; font-style:normal;">— Joel Childers</span>
+                </div>
+                <div style="margin-top:3rem;">
+                    <div style="display:flex; justify-content:space-between; font-size:0.75rem; font-weight:bold; margin-bottom:8px; text-transform:uppercase; letter-spacing:1px;">
+                        <span>Chapter Insight</span>
+                        <span>${earned} / 30 Tokens</span>
+                    </div>
+                    <div class="progress-bar"><div class="progress-fill" style="width:${progress}%"></div></div>
+                </div>
+                <button class="quiz-btn" style="margin-top:2rem; width:100%; text-align:center; font-weight:bold; background:var(--accent-primary); color:black;" onclick="switchTab('quiz')">Enter Combat Check</button>
+            `;
+        }
+
+        // --- QUIZ ---
+        function renderQuiz(data) {
+            const container = document.getElementById('quiz');
+            container.innerHTML = `<h2>Survival Knowledge</h2>` + data.questions.map((q, qIdx) => `
+                <div style="margin-top:2rem;">
+                    <p style="font-size:1.1rem; margin-bottom:1rem;">${qIdx+1}. ${q.q}</p>
+                    <div class="quiz-grid">
+                        ${q.a.map((opt, aIdx) => `
+                            <button class="quiz-btn" onclick="checkQuiz(this, ${data.num}, ${qIdx}, ${aIdx})">${opt}</button>
+                        `).join('')}
+                    </div>
+                </div>
+            `).join('') + `<button class="quiz-btn" style="margin-top:3rem; opacity:0.6;" onclick="switchTab('verse')">Next: Sword Drill</button>`;
+        }
+
+        function checkQuiz(btn, chNum, qIdx, aIdx) {
+            const correct = gameData[chNum-1].questions[qIdx].c;
+            const parent = btn.parentElement;
+            if(parent.querySelector('.correct') || parent.querySelector('.wrong')) return;
+
+            if(aIdx === correct) {
+                btn.classList.add('correct');
+                addTokens(chNum, 4);
+                showToast("Target Hit! +4 Tokens");
+            } else {
+                btn.classList.add('wrong');
+                parent.querySelectorAll('.quiz-btn')[correct].classList.add('correct');
+            }
+        }
+
+        // --- VERSE FILL ---
+        function renderVerse(data) {
+            state.verseProgress = [];
+            const container = document.getElementById('verse');
+            let display = data.fill.text;
+            data.fill.words.forEach((w, i) => {
+                display = display.replace("____", `<span class="verse-blank" id="blank-${i}">?</span>`);
+            });
+
+            container.innerHTML = `
+                <h2>Sword Drill: Memory Verse</h2>
+                <p style="font-size:1.5rem; line-height:2.2; margin: 2.5rem 0; color:#cbd5e1;">${display}</p>
+                <div class="verse-options">
+                    ${data.fill.options.sort(() => Math.random() - 0.5).map(opt => `<button class="verse-option-btn" onclick="checkVerse(this, ${data.num})">${opt}</button>`).join('')}
+                </div>
+                <button class="quiz-btn" style="margin-top:3rem; opacity:0.6;" onclick="switchTab('order')">Next: Strategy Plan</button>
+            `;
+        }
+
+        function checkVerse(btn, chNum) {
+            const data = gameData[chNum-1].fill;
+            const currentIdx = state.verseProgress.length;
+            if(currentIdx >= data.words.length) return;
+
+            if(btn.innerText === data.words[currentIdx]) {
+                document.getElementById(`blank-${currentIdx}`).innerText = btn.innerText;
+                document.getElementById(`blank-${currentIdx}`).style.color = "var(--success)";
+                state.verseProgress.push(btn.innerText);
+                btn.style.opacity = '0.2';
+                btn.style.pointerEvents = 'none';
+                if(state.verseProgress.length === data.words.length) {
+                    addTokens(chNum, 9);
+                    showToast("Verse Locked! +9 Tokens");
+                }
+            } else {
+                showToast("Not in the Word!");
+                btn.classList.add('wrong');
+                setTimeout(() => btn.classList.remove('wrong'), 500);
+            }
+        }
+
+        // --- ORDERING ---
+        function renderOrder(data) {
+            const shuffled = [...data.order].sort(() => Math.random() - 0.5);
+            const container = document.getElementById('order');
+            container.innerHTML = `
+                <h2>Action Strategy</h2>
+                <p style="color:var(--text-muted); margin-bottom:1.5rem;">Click two steps to swap their order into the correct plan sequence.</p>
+                <div id="orderList">
+                    ${shuffled.map((item, i) => `<div class="order-item" onclick="swapOrder(this, ${i}, ${data.num})"><span class="logo-circle" style="width:28px; height:28px; font-size:0.8rem; background:var(--bg-panel); color:var(--accent-secondary); border:1px solid var(--accent-secondary);">${i+1}</span> <span class="txt">${item}</span></div>`).join('')}
+                </div>
+                <button class="quiz-btn" style="margin-top:2.5rem; background:var(--accent-secondary); color:black; width:100%; font-weight:bold;" onclick="checkOrder(${data.num})">Verify Strategy Plan</button>
+            `;
+        }
+
+        let firstSwap = null;
+        function swapOrder(el, idx, chNum) {
+            if(firstSwap === null) {
+                firstSwap = { el, idx };
+                el.classList.add('selected');
+            } else {
+                const list = document.getElementById('orderList');
+                const items = Array.from(list.querySelectorAll('.order-item .txt'));
+                
+                // Swap text values
+                const temp = items[idx].innerText;
+                items[idx].innerText = items[firstSwap.idx].querySelector('.txt').innerText;
+                items[firstSwap.idx].innerText = temp;
+
+                firstSwap.el.classList.remove('selected');
+                firstSwap = null;
+            }
+        }
+
+        function checkOrder(chNum) {
+            const original = gameData[chNum-1].order;
+            const current = Array.from(document.querySelectorAll('#orderList .txt')).map(s => s.innerText);
+            
+            let correct = true;
+            original.forEach((val, i) => { if(val !== current[i]) correct = false; });
+
+            if(correct) {
+                addTokens(chNum, 9);
+                showToast("Strategy Perfect! +9 Tokens");
+                if((state.chapterTokens[chNum] || 0) >= 30 && chNum === state.unlockedUntil) {
+                    state.unlockedUntil++;
+                    renderSidebar();
+                    showToast("NEXT CHAPTER UNLOCKED!");
+                }
+            } else {
+                showToast("Sequence Flawed - Try Again.");
+            }
+        }
+
+        // --- UTILS ---
+        function addTokens(chNum, amt) {
+            if(!state.chapterTokens[chNum]) state.chapterTokens[chNum] = 0;
+            if(state.chapterTokens[chNum] < 30) {
+                state.chapterTokens[chNum] = Math.min(30, state.chapterTokens[chNum] + amt);
+                state.tokens += amt;
+                updateHeader();
+                renderStory(gameData[chNum-1]);
+                save();
+            }
+        }
+
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            t.innerText = msg;
+            t.classList.add('show');
+            setTimeout(() => t.classList.remove('show'), 2500);
+        }
+
+        function resetGame() {
+            if(confirm("Abandon expedition and erase all progress?")) {
+                localStorage.clear();
+                location.reload();
+            }
+        }
+
+        init();
+    </script>
+</body>
+</html>
