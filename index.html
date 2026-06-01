@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Predators of the Soul — Interactive Study</title>
+  <title>Predators of the Soul — Full Interactive Study</title>
   <style>
     :root{
       --bg:#1a1d1a;           /* dark jungle green/black */
@@ -40,13 +40,12 @@
     .btn:disabled{opacity:.4; cursor:not-allowed}
     .ghost{background:transparent; border:1px solid rgba(255,179,71,.4); color: var(--accent)}
 
-    .grid{ display:grid; grid-template-columns: 300px 1fr; gap:20px; }
+    .grid{ display:grid; grid-template-columns: 320px 1fr; gap:20px; }
     @media (max-width: 900px){ .grid{ grid-template-columns: 1fr; } }
 
-    /* Map / Navigation */
     .panel{background:var(--bg-soft); border:1px solid rgba(255,255,255,.05); border-radius:var(--radius); box-shadow:var(--shadow); overflow: hidden;}
     .panel h2{margin:0; padding:15px; border-bottom:1px solid rgba(255,255,255,.08); font-size:16px; text-transform: uppercase; color:var(--muted)}
-    .chapters{padding:10px; max-height:75vh; overflow-auto: scroll;}
+    .chapters{padding:10px; max-height:75vh; overflow-y: auto;}
     .chapter-item{display:flex; align-items:center; justify-content:space-between; gap:10px; padding:12px; border-radius:8px; cursor:pointer; margin-bottom: 5px; border:1px solid transparent}
     .chapter-item:hover{background:rgba(255,179,71,0.1);}
     .chapter-item.active{background:rgba(255,179,71,0.2); border-color: var(--accent);}
@@ -54,23 +53,21 @@
     .chapter-item .title{font-weight:700; font-size: 14px;}
     .chapter-item .meta{font-size:11px; color:var(--muted)}
 
-    /* Main Stage */
     .tabs{display:flex; gap:2px; background: rgba(0,0,0,0.2); padding: 5px 5px 0 5px;}
     .tab{padding:10px 20px; border-radius:8px 8px 0 0; font-weight:700; cursor:pointer; font-size: 13px; color: var(--muted);}
     .tab.active{background:var(--bg-soft); color:var(--accent); border: 1px solid rgba(255,255,255,0.05); border-bottom: none;}
 
-    .inner{padding:25px; min-height: 400px;}
+    .inner{padding:25px; min-height: 450px;}
     .story-text{font-size: 17px; line-height: 1.7; color: #e0e0e0;}
     .story-text h3{color: var(--accent); margin-top: 0;}
     .key-verse{margin:20px 0; padding:20px; border-left: 4px solid var(--accent); background:rgba(255,179,71,0.05); font-style:italic; font-size: 18px;}
 
-    /* Games */
     .gamebox{display:flex; flex-direction:column; gap:15px}
     .question{background:rgba(0,0,0,0.2); padding:20px; border-radius:8px; font-size: 18px;}
     .answers{display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top: 10px;}
     @media (max-width: 600px){ .answers{grid-template-columns:1fr} }
     .answer{background: rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); padding:15px; border-radius:8px; cursor:pointer; color: var(--ink); text-align: left; font-size: 15px;}
-    .answer:hover{background: rgba(255,255,255,0.1);}
+    .answer:hover:not(:disabled){background: rgba(255,255,255,0.1);}
     .answer.correct{background:var(--accent-2) !important; color: #000; font-weight: bold;}
     .answer.wrong{background:var(--danger) !important; color: #fff;}
 
@@ -79,6 +76,8 @@
     .drop-zone{min-height:100px; display:flex; flex-direction:column; gap:10px; padding:15px; border:2px dashed rgba(255,179,71,0.3); border-radius:8px;}
 
     .toast{position:fixed; bottom:20px; right:20px; background:var(--accent-2); color:#000; padding:12px 24px; border-radius:8px; font-weight:bold; display:none; z-index:1000; box-shadow: var(--shadow);}
+    
+    footer{text-align: center; padding: 40px; color: var(--muted); font-size: 12px; opacity: 0.7;}
   </style>
 </head>
 <body>
@@ -90,8 +89,8 @@
       </div>
       <div class="topbar">
         <span class="badge" id="tokenCount">Victory Tokens: 0</span>
-        <span class="badge" id="chapterStatus">Intro / 9</span>
-        <button class="btn ghost" id="resetBtn">Reset Progress</button>
+        <span class="badge" id="chapterStatus">1 / 10</span>
+        <button class="btn ghost" id="resetBtn">Reset</button>
       </div>
     </header>
 
@@ -111,6 +110,10 @@
         <div class="inner" id="tabContent"></div>
       </section>
     </div>
+    
+    <footer>
+      Based on "Predators of the Soul" by Joel Childers. All Scripture NASB/KJV as per text.
+    </footer>
   </div>
 
   <div class="toast" id="toast"></div>
@@ -118,86 +121,185 @@
   <script>
     const chapters = [
       {
-        num: 0,
-        title: "Introduction: The Jungle",
-        summary: "We are surrounded by a 'jungle of the soul' where predators stalk us. Lieutenant-Colonel John Patterson's encounter with the Tsavo lions shows us that we often live oblivious to the savage brutes seeking to devour our faith, hope, and love.",
-        keyVerse: { text: "Be of sober spirit, be on the alert. Your adversary, the devil, prowls around like a roaring lion, seeking someone to devour.", ref: "1 Peter 5:8" },
+        title: "0. Introduction",
+        summary: "The 'jungle of the soul' is a habitat full of creatures on the hunt to kill, steal, and destroy. Like the Tsavo lions, sin exploits our weaknesses. We are born defenseless because of our first ancestor, but Jesus Christ came to release us from the law of the jungle.",
+        keyVerse: { text: "He is able to save them completely and forever who believe in Him.", ref: "Hebrews 7:25" },
         quiz: [
-          { q: "How many people did the Tsavo lions allegedly kill?", options: ["12","50","135","300"], a: 2 },
-          { q: "What is the 'law of the jungle' mentioned in the text?", options: ["Survival of the fittest","You sin and you will die","Eat or be eaten","Trust no one"], a: 1 },
-          { q: "According to the author, why is the predator of sin so successful?", options: ["It is faster than us","It has bigger teeth","The condition of the prey (our nature)","It never sleeps"], a: 2 }
+          { q: "Who was the Lieutenant-Colonel that built the bridge across the Tsavo River?", options: ["John Patterson","Joel Childers","John Paul","Charles de Foucald"], a: 0 },
+          { q: "According to the author, why is the predator of sin successful?", options: ["It is fast","The condition of the prey (our nature)","It has no fear","It is invisible"], a: 1 }
         ],
         verseFill: {
-          base: "Your ____, the devil, prowls around like a ____ lion.",
-          choices: ["adversary","roaring","friend","hungry"],
-          missing: ["adversary","roaring"]
+          base: "The thief comes to steal, kill, and ____, but He came to give ____.",
+          choices: ["destroy","life","hope","peace"],
+          missing: ["destroy","life"]
         },
         order: {
-          prompt: "Sequence of the Introduction's message:",
-          steps: ["Oblivious to the danger","The attack of the predator","The realization of the environment","The victory through the Finished Work"]
+          prompt: "Sequence of the soul's transition:",
+          steps: ["Born into sin nature","Under the law of the jungle","Rescued by Jesus Christ","Transferred to the Kingdom"]
         }
       },
       {
-        num: 1,
-        title: "The Lion of Fear",
-        summary: "Lions are fearsome because they instill panic to start a stampede. In the domain of darkness, Fear is the lion. If we run, Fear has the advantage. We must stand our ground and use the weapons of the Spirit.",
+        title: "1. The Lion of Fear",
+        summary: "Lions hunt in packs, starting stampedes to weed out the weak. In the soul, Fear roars to cause a stampede of emotions and imagination. We often let our minds run into 'worst-case scenarios.' The only answer is to kill the man-eater swiftly.",
         keyVerse: { text: "For God has not given us a spirit of fear, but of power and of love and of a sound mind.", ref: "2 Timothy 1:7" },
         quiz: [
-          { q: "What is the lion's main tactic to catch stronger prey?", options: ["Sleep","Start a stampede","Hide in water","Fair combat"], a: 1 },
-          { q: "What does the author call 'False Evidence Appearing Real'?", options: ["FAITH","FEAR","LIES","MYTH"], a: 1 },
-          { q: "What was the author's personal 'lion' as a child?", options: ["The dark","Spiders","Oblivion (nothing after death)","Lions"], a: 2 }
+          { q: "Lions specialize in hunting what large mammal in Botswana?", options: ["Giraffe","Elephant","Hippo","Rhino"], a: 1 },
+          { q: "What is the author's acrostic for F.E.A.R.?", options: ["Faith Ending All Reality","False Evidence Appearing Real","Forget Everything And Run","Feelings Enter All Rooms"], a: 1 }
         ],
         verseFill: {
-          base: "God has not given us a ____ of ____.",
-          choices: ["spirit","fear","heart","courage"],
-          missing: ["spirit","fear"]
+          base: "Those who ____ in the Lord are like Mount ____, which cannot be moved.",
+          choices: ["trust","Zion","rock","faith"],
+          missing: ["trust","Zion"]
         },
         order: {
           prompt: "The 5-step action plan against Fear:",
-          steps: ["Stand your ground","Shoot first (Prayer)","Use the Word of God","Lean on your Ally (Christ)","Fill your mind with Wonder"]
+          steps: ["Stand your ground","Shoot first (Prayer)","Use the Word of God","Lean upon your ally (Christ)","Fill mind with Wonder"]
         }
       },
       {
-        num: 2,
-        title: "The Leopard of Wrath",
-        summary: "The leopard is a hidden danger that relies on ambush and stealth. It represents human anger and violence. It is most effective in chaos and stress. Unlike 'righteous anger,' human anger is rooted in self.",
+        title: "2. The Leopard of Wrath",
+        summary: "The leopard relies on stealth, ambush, and patience. It represents human anger, which is often self-centered and hides in the 'bush' of our souls. Anger feeds on stress and crisis, and like the leopard, it has a death grip once it bites.",
         keyVerse: { text: "The anger of man does not achieve the righteousness of God.", ref: "James 1:20" },
         quiz: [
-          { q: "Where does the leopard take its prey to eat in safety?", options: ["A cave","A tree","Underground","The river"], a: 1 },
-          { q: "What is the 'root' of human anger according to the author?", options: ["Justice","Other people","The self-centered core","Lack of sleep"], a: 2 },
-          { q: "Which fruit of the Spirit is the quality of 'staying the course'?", options: ["Joy","Endurance/Patience","Kindness","Faithfulness"], a: 1 }
+          { q: "What does the leopard do once it defeats its prey?", options: ["Eats it immediately","Climbs a tree to eat in safety","Buries it","Shares with the pack"], a: 1 },
+          { q: "What is the 'root' of most human anger according to the author?", options: ["Justice","Self-centered core","Ignorance","Bad luck"], a: 1 }
         ],
         verseFill: {
-          base: "Walk by the ____ and you will not carry out the ____ of the flesh.",
-          choices: ["Spirit","desires","Word","laws"],
-          missing: ["Spirit","desires"]
+          base: "Be ____ but don't ____.",
+          choices: ["angry","sin","loud","fight"],
+          missing: ["angry","sin"]
         },
         order: {
-          prompt: "The tools to kill the Leopard of Anger:",
-          steps: ["Self-Control","Peace (no more walls)","Endurance (stronger than stress)","Consciousness of Christ"]
+          prompt: "Weapons to kill the Leopard of Anger:",
+          steps: ["Self-Control through the Spirit","Walking in Peace","Patient Endurance","Keeping Christ in Consciousness"]
         }
       },
       {
-        num: 3,
-        title: "The Pack of Lies",
-        summary: "Wild dogs hunt by running prey to exhaustion. The devil uses lies, myths, and speculation to wear us down until we are too tired to fight back. We must stand firm to break the chase.",
+        title: "3. The Pack of Lies",
+        summary: "African wild dogs run their prey to exhaustion. The devil uses 'packs' of lies, myths, and speculation to wear us down. If he can get our minds running, we become easy to trip up. We must stand our ground like the wise wildebeests.",
         keyVerse: { text: "He is a liar and the father of lies.", ref: "John 8:44" },
         quiz: [
-          { q: "How do Cape hunting dogs capture animals larger than themselves?", options: ["Great strength","Venom","Running them to exhaustion","Ambush"], a: 2 },
-          { q: "Which is NOT one of the three 'packs' mentioned?", options: ["Lies","Myths","Speculation","Temptation"], a: 3 },
-          { q: "What are the 'Horns' and 'Hooves' of our defense?", options: ["Willpower and Strength","Authority and Power of the Word","Church and Family","Prayer and Fasting"], a: 1 }
+          { q: "How do wild dogs capture animals twice their size?", options: ["By biting the neck","By running them to exhaustion","By using venom","By digging traps"], a: 1 },
+          { q: "What are the 'Horns' and 'Hooves' God has given us?", options: ["Strength and Speed","Authority and Power of the Word","Money and Influence","Books and Music"], a: 1 }
         ],
         verseFill: {
-          base: "Know the ____ and the ____ shall set you free.",
-          choices: ["truth","truth","way","life"],
-          missing: ["truth","truth"]
+          base: "The Word of God is ____ than any ____ sword.",
+          choices: ["sharper","two-edged","better","magic"],
+          missing: ["sharper","two-edged"]
         },
         order: {
-          prompt: "How a lie takes down a soul:",
-          steps: ["An initial deceptive thought","Misguided faith in the lie","Emotional exhaustion","The final trip and fall"]
+          prompt: "The three 'packs' of the Wild Dogs:",
+          steps: ["Lies (Deception)","Myths (Accepted untruths)","Speculation (Self-concern)"]
+        }
+      },
+      {
+        title: "4. Staying with the Herd",
+        summary: "Predators always try to separate the prey from the herd. Isolation is a sure opening for lies and speculation. In the herd, 'horns and hoofs' are multiplied. We must avoid 'moralism' which scares the weak away from the group.",
+        keyVerse: { text: "Two people are better off than one, for they can help each other succeed.", ref: "Ecclesiastes 4:9" },
+        quiz: [
+          { q: "Which animal uses the strategy of 'circling' to protect the weak?", options: ["Wildebeests","Yaks","Buffalo","Elephants"], a: 1 },
+          { q: "What is 'moralism' in the context of the church?", options: ["Following the Bible","Worship of morals over Grace","Kindness","Strict discipline"], a: 1 }
+        ],
+        verseFill: {
+          base: "As ____ sharpens ____, so one man his brother.",
+          choices: ["iron","iron","steel","swords"],
+          missing: ["iron","iron"]
+        },
+        order: {
+          prompt: "Strategy for utilizing the herd:",
+          steps: ["Surround with strong mature people","Avoid herds based on judgment","Find friends who hold you accountable","Find people to develop and share strength"]
+        }
+      },
+      {
+        title: "5. The Crouching Tiger",
+        summary: "The tiger represents sexual immorality. It is alluring but deadly, an indiscriminate man-eater. It stalks the perimeters of the mind and marriage. We must fortify our 'village' with high walls and the fire of the Holy Spirit.",
+        keyVerse: { text: "Set your affections on things above and not on things of the earth.", ref: "Colossians 3:2" },
+        quiz: [
+          { q: "What animal did the tiger attack while humans were riding it?", options: ["Horse","Elephant","Camel","Buffalo"], a: 1 },
+          { q: "What is the 'range weapon' or 'spear' against sexual darkness?", options: ["Fasting","Prayer","The Bible","Music"], a: 1 }
+        ],
+        verseFill: {
+          base: "The two were ____ and not ____.",
+          choices: ["naked","ashamed","clothed","hiding"],
+          missing: ["naked","ashamed"]
+        },
+        order: {
+          prompt: "Building the village defenses:",
+          steps: ["The Power of the Cross","The Spirit within (Fire)","High walls (Covenants)","Standard of Righteousness (The Word)"]
+        }
+      },
+      {
+        title: "6. The Crocodile",
+        summary: "Crocodiles represent despair and depression. They hide in the routine tasks of life, waiting to drag us under. The 'Mara' river represents both 'a time' and 'bitterness.' The secret to overcoming is not 'trying' but 'letting.'",
+        keyVerse: { text: "Do not let your hearts be troubled.", ref: "John 14:1" },
+        quiz: [
+          { q: "What river must the wildebeest cross in East Africa?", options: ["Nile","Mara River","Zambezi","Congo"], a: 1 },
+          { q: "What did Moses throw into the bitter water to make it sweet?", options: ["A stone","A branch","Salt","His staff"], a: 1 }
+        ],
+        verseFill: {
+          base: "He shall give you another ____, that He may abide with you ____.",
+          choices: ["Comforter","forever","friend","daily"],
+          missing: ["Comforter","forever"]
+        },
+        order: {
+          prompt: "Tactics against Despair:",
+          steps: ["Realize we must go through difficult times","Don't let your heart be troubled","Abandon your soul to the Comforter","Receive the Faith of Christ","Hold on to Hope"]
+        }
+      },
+      {
+        title: "7. The Greed of the Hyena",
+        summary: "The hyena represents the love of money. It is a 'speed-eater' that symbolizes gluttony and greed. It starts with small compromises that open the door for robbery. The antidote is to 'make friends with money' by using it for the Kingdom.",
+        keyVerse: { text: "The love of money is the root of all kinds of evil.", ref: "1 Timothy 6:10" },
+        quiz: [
+          { q: "Hyenas are known as 'harbingers of...' by Africans?", options: ["Wealth","Evil","Luck","Storms"], a: 1 },
+          { q: "How long does it take 35 hyenas to consume an adult zebra?", options: ["2 mins","10 mins","36 minutes","2 hours"], a: 2 }
+        ],
+        verseFill: {
+          base: "Godliness with ____ is great ____.",
+          choices: ["contentment","gain","peace","wealth"],
+          missing: ["contentment","gain"]
+        },
+        order: {
+          prompt: "How to live free from greed:",
+          steps: ["Seek first the Kingdom","Make friends with money (stewardship)","Be a cheerful giver","Exercise simplicity"]
+        }
+      },
+      {
+        title: "8. The Cheetah of Pride",
+        summary: "Pride is a cheetah: sleek, attractive, and built for speed. It trips us up by making us think we 'can handle it.' Pride centers on human quality rather than God's grace. To kill pride, we must get out of the race for glory.",
+        keyVerse: { text: "It depends not on human will or exertion, but on God, who has mercy.", ref: "Romans 9:16" },
+        quiz: [
+          { q: "What does the word 'glory' mean in the text?", options: ["Bright light","Weight or value","Power","Singing"], a: 1 },
+          { q: "What is the only thing we should boast in?", options: ["Our skills","Our ministry","The cross of Christ","Our family"], a: 2 }
+        ],
+        verseFill: {
+          base: "Christ in you, the ____ of ____.",
+          choices: ["hope","glory","way","life"],
+          missing: ["hope","glory"]
+        },
+        order: {
+          prompt: "The Solution to Pride:",
+          steps: ["Accept that everything is Grace","Get out of the race for glory","Stop judging worth by world standards","Stop comparing to others"]
+        }
+      },
+      {
+        title: "9. Life: The Seated Yoke",
+        summary: "Jesus came to reverse death and give life. The Christian life is an invitation to rest, not labor. Christ's yoke is a 'seated yoke' because the work is finished. Walking with Jesus means walking in wonder and victory.",
+        keyVerse: { text: "Come to Me, all who are weary and heavy-laden, and I will give you rest.", ref: "Matthew 11:28" },
+        quiz: [
+          { q: "Where is Jesus right now, according to the text?", options: ["Walking the earth","Seated at the right hand of God","In the Garden","In a boat"], a: 1 },
+          { q: "The quality of your life is determined by...", options: ["Your abilities","The One you walk with","Your income","Your health"], a: 1 }
+        ],
+        verseFill: {
+          base: "My yoke is ____ and My ____ is light.",
+          choices: ["easy","burden","good","heavy"],
+          missing: ["easy","burden"]
+        },
+        order: {
+          prompt: "The Seated Yoke process:",
+          steps: ["Drop the yoke of 'trying to be good enough'","Take His yoke","Believe you are already right with Him","Walk in wonder and rest"]
         }
       }
-      // Note: Additional chapters (4-9) would follow the same structure using the OCR provided.
     ];
 
     let state = {
@@ -209,14 +311,14 @@
     };
 
     function init() {
-      const saved = localStorage.getItem('predators_progress');
+      const saved = localStorage.getItem('predators_game_progress');
       if(saved) state = JSON.parse(saved);
       renderChapterList();
       loadChapter(state.currentChapter);
       
       document.getElementById('resetBtn').onclick = () => {
-        if(confirm("Reset all victory tokens and progress?")) {
-          localStorage.removeItem('predators_progress');
+        if(confirm("Clear all victory tokens?")) {
+          localStorage.removeItem('predators_game_progress');
           location.reload();
         }
       };
@@ -241,8 +343,9 @@
         item.innerHTML = `
           <div>
             <div class="title">${ch.title}</div>
-            <div class="meta">Score: ${state.scores[i] || 0}</div>
+            <div class="meta">Highest Score: ${state.scores[i] || 0}</div>
           </div>
+          ${locked ? '🔒' : ''}
         `;
         if(!locked) item.onclick = () => loadChapter(i);
         list.appendChild(item);
@@ -270,7 +373,7 @@
             <h3>${ch.title}</h3>
             <p>${ch.summary}</p>
             <div class="key-verse">"${ch.keyVerse.text}" <br><small>— ${ch.keyVerse.ref}</small></div>
-            <button class="btn" onclick="document.querySelector('[data-tab=quiz]').click()">Enter Battle</button>
+            <button class="btn" onclick="document.querySelector('[data-tab=quiz]').click()">Prepare for Battle</button>
           </div>
         `;
       } else if (state.currentTab === 'quiz') {
@@ -298,10 +401,10 @@
             if(oIdx === q.a) {
               btn.classList.add('correct');
               addTokens(10);
-              toast("Critical Hit! +10 Tokens");
+              toast("Victory! +10 Tokens");
             } else {
               btn.classList.add('wrong');
-              toast("The predator lunges! Try again.");
+              toast("The predator strikes! Try again.");
             }
             Array.from(ansWrap.children).forEach(b => b.disabled = true);
           };
@@ -316,7 +419,7 @@
     function renderVerse(ch) {
       const box = document.createElement('div');
       box.className = 'gamebox';
-      box.innerHTML = `<div class="question">Fill the Blanks:<br><br> ${ch.verseFill.base}</div>`;
+      box.innerHTML = `<div class="question">Memory Sword (Select the right words):<br><br> ${ch.verseFill.base}</div>`;
       
       const shelf = document.createElement('div');
       shelf.className = 'answers';
@@ -329,7 +432,7 @@
           if(ch.verseFill.missing.includes(word)) {
             btn.classList.add('correct');
             addTokens(15);
-            toast("Word Hidden in Heart! +15 Tokens");
+            toast("Word Anchored! +15 Tokens");
           } else {
             btn.classList.add('wrong');
           }
@@ -342,11 +445,11 @@
 
     function renderOrder(ch) {
       const content = document.getElementById('tabContent');
-      content.innerHTML = `<div class="question"><b>Tactical Maneuver:</b> ${ch.order.prompt}</div><br>`;
+      content.innerHTML = `<div class="question"><b>Execute Strategy:</b> ${ch.order.prompt}</div><br>`;
       
       const pool = document.createElement('div'); pool.className = 'drag-list';
       const zone = document.createElement('div'); zone.className = 'drop-zone';
-      zone.textContent = "Drop steps here in order...";
+      zone.textContent = "Arrange tactics here (top to bottom)...";
 
       const shuffled = [...ch.order.steps].sort(() => Math.random() - 0.5);
       shuffled.forEach(s => {
@@ -363,11 +466,11 @@
       const check = document.createElement('button');
       check.className = 'btn';
       check.style.marginTop = '20px';
-      check.textContent = "Execute Strategy";
+      check.textContent = "Deploy Tactics";
       check.onclick = () => {
         const currentOrder = Array.from(zone.children).map(c => c.textContent);
         if(JSON.stringify(currentOrder) === JSON.stringify(ch.order.steps)) {
-          toast("Victory! New Area Unlocked!");
+          toast("Area Secured! New Level Unlocked!");
           addTokens(30);
           if(state.unlocked === state.currentChapter && state.unlocked < chapters.length - 1) {
             state.unlocked++;
@@ -375,7 +478,7 @@
           save();
           renderChapterList();
         } else {
-          toast("Tactical error. Check your sequence.");
+          toast("Tactical failure. Rearrange and retry.");
         }
       };
 
@@ -399,7 +502,7 @@
     }
 
     function save() {
-      localStorage.setItem('predators_progress', JSON.stringify(state));
+      localStorage.setItem('predators_game_progress', JSON.stringify(state));
     }
 
     window.onload = init;
